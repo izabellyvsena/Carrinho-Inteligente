@@ -1,6 +1,4 @@
 import express from "express";
-import path from "path";
-import { createServer as createViteServer } from "vite";
 import { GoogleGenAI, Type } from "@google/genai";
 import dotenv from "dotenv";
 
@@ -246,7 +244,7 @@ function getLocalFallback(listText: string, location?: string) {
 }
 
 // ==========================================
-// API ROUTE (Agora declarada diretamente no App)
+// API ROUTE
 // ==========================================
 app.post("/api/check-list", async (req, res) => {
   const { listText, items, location, profileOption } = req.body;
@@ -359,9 +357,10 @@ app.post("/api/check-list", async (req, res) => {
 // CONFIGURAÇÃO DE AMBIENTE (LOCAL VS VERCEL)
 // ==========================================
 
-// Se NÃO estivermos na Vercel (Production), ele cria o servidor local.
+// Se NÃO estivermos na Vercel (Produção), ele usa uma importação dinâmica para não quebrar a nuvem
 if (process.env.NODE_ENV !== "production") {
-  async function startLocalServer() {
+  // O "import" dinâmico só acorda o Vite quando você testa no seu computador
+  import("vite").then(async ({ createServer: createViteServer }) => {
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: "spa",
@@ -371,8 +370,7 @@ if (process.env.NODE_ENV !== "production") {
     app.listen(3000, "0.0.0.0", () => {
       console.log("Servidor de desenvolvimento rodando na porta 3000");
     });
-  }
-  startLocalServer();
+  }).catch(err => console.error("Erro ao iniciar ambiente de dev:", err));
 }
 
 // A Vercel vai usar apenas esta linha para gerenciar o seu aplicativo
