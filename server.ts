@@ -6,6 +6,9 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
+// O aplicativo (app) foi movido para o escopo global para que a Vercel possa acessá-lo no final do arquivo
+const app = express();
+
 function getLocalFallback(listText: string, location?: string) {
   const lines = listText.split("\n").map(l => l.trim()).filter(Boolean);
   const items: any[] = [];
@@ -422,7 +425,6 @@ function getLocalFallback(listText: string, location?: string) {
 }
 
 async function startServer() {
-  const app = express();
   const PORT = 3000;
 
   app.use(express.json());
@@ -556,7 +558,8 @@ ${finalRawText}
       
       // Limpeza robusta de Markdown para evitar quebra de leitura do JSON
       let cleanText = responseText.trim();
-      cleanText = cleanText.replace(/^```json\s*/i, '').replace(/^```\s*/, '').replace(/\s*```$/i, '');
+      cleanText = cleanText.replace(/^```json\s*/i, '').replace(/^
+```\s*/, '').replace(/\s*```$/i, '');
       
       const resultObj = JSON.parse(cleanText);
       return res.json(resultObj);
@@ -593,3 +596,6 @@ ${finalRawText}
 }
 
 startServer();
+
+// O comando crucial exigido pela Vercel para ler o seu backend!
+module.exports = app;
