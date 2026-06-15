@@ -65,7 +65,7 @@ app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
 
-// Porta dinâmica para o Render
+// Porta dinâmica para o Render (APENAS UMA VEZ)
 const PORT = process.env.PORT || 3000;
 
 app.listen(Number(PORT), "0.0.0.0", () => {
