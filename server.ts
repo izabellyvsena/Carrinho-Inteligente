@@ -70,3 +70,12 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log(`PechinchaBot rodando na porta ${PORT}`);
 });
 
+// ... (seu código anterior permanece igual)
+
+// Garanta que PORT esteja definido antes de ser usado
+const PORT = process.env.PORT || 3000;
+
+app.listen(Number(PORT), "0.0.0.0", () => {
+  console.log(`PechinchaBot rodando na porta ${PORT}`);
+});
+
