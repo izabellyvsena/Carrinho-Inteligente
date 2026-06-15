@@ -1,6 +1,7 @@
 import express from "express";
 import { GoogleGenAI, Type } from "@google/genai";
 import dotenv from "dotenv";
+import path from "path";
 
 dotenv.config();
 
@@ -9,8 +10,8 @@ app.use(express.json());
 
 // Função de fallback para simulação offline
 function getLocalFallback(listText: string, location?: string) {
-  const targetLocation = location || "Baixada Fluminense (Duque de Caxias, Meriti, etc.)";
-  const cleanLocName = targetLocation.split(",")[0].trim() || "Sua Região";
+  const targetLocation = location || "Baixada Fluminense";
+  const cleanLocName = targetLocation.split(",")[0].trim();
   
   return {
     items: [{ name: "Análise Offline", qty: "1 un", priceTraditional: 10.0, priceWholesale: 8.0 }],
@@ -21,7 +22,7 @@ function getLocalFallback(listText: string, location?: string) {
     economyCenters: [
       { name: `Assaí Atacadista - ${cleanLocName}`, address: "Consulte o mapa local", badge: "Atacado", desc: "Simulação ativa.", active: true }
     ],
-    assistantMessage: `💡 [Modo Offline] Simulação para ${targetLocation}. Configure a GEMINI_API_KEY no Render para inteligência real.`
+    assistantMessage: `💡 [Modo Offline] Simulação para ${targetLocation}. Configure a GEMINI_API_KEY no Render.`
   };
 }
 
@@ -58,24 +59,15 @@ app.post("/api/check-list", async (req, res) => {
   }
 });
 
-// Servir arquivos estáticos da pasta 'dist' (React)
-const path = require('path');
+// Servir arquivos estáticos (Frontend React)
 app.use(express.static(path.join(__dirname, 'dist')));
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
 
-// Porta do Render (obrigatória)const PORT = process.env.PORT || 3000;
-app.listen(PORT, "0.0.0.0", () => {
-  console.log(`PechinchaBot rodando na porta ${PORT}`);
-});
-
-// ... (seu código anterior permanece igual)
-
-// Garanta que PORT esteja definido antes de ser usado
+// Porta dinâmica para o Render
 const PORT = process.env.PORT || 3000;
 
 app.listen(Number(PORT), "0.0.0.0", () => {
   console.log(`PechinchaBot rodando na porta ${PORT}`);
 });
-
