@@ -1,14 +1,19 @@
 import express from "express";
-import { GoogleGenAI, Type } from "@google/genai";
+import { GoogleGenAI } from "@google/genai";
 import dotenv from "dotenv";
 import path from "path";
+import { fileURLToPath } from 'url';
 
 dotenv.config();
+
+// Configuração necessária para rodar módulos ES no Node
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 app.use(express.json());
 
-// Função de fallback
+// Função de fallback para simulação offline
 function getLocalFallback(listText: string, location?: string) {
   const targetLocation = location || "Baixada Fluminense";
   return {
@@ -26,7 +31,7 @@ function getLocalFallback(listText: string, location?: string) {
 
 // Rota da API
 app.post("/api/check-list", async (req, res) => {
-  const { listText, items, location } = req.body;
+  const { listText, location } = req.body;
   const targetLocation = location || "Baixada Fluminense";
 
   try {
@@ -51,13 +56,24 @@ app.post("/api/check-list", async (req, res) => {
   }
 });
 
-// Servir arquivos estáticos
+// Servir arquivos estáticos da pasta 'dist'
+// Se o build gerar 'dist/dist', tentamos buscar nela também
 app.use(express.static(path.join(__dirname, 'dist')));
+app.use(express.static(path.join(__dirname, 'dist', 'dist')));
+
 app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+  const indexPath = path.join(__dirname, 'dist', 'index.html');
+  const doubleIndexPath = path.join(__dirname, 'dist', 'dist', 'index.html');
+  
+  // Verifica qual caminho é válido
+  const fs = require('fs');
+  if (fs.existsSync(indexPath)) {
+    res.sendFile(indexPath);
+  } else {
+    res.sendFile(doubleIndexPath);
+  }
 });
 
-// Apenas um listener!
 const PORT = process.env.PORT || 3000;
 app.listen(Number(PORT), "0.0.0.0", () => {
   console.log(`PechinchaBot rodando na porta ${PORT}`);
