@@ -26,7 +26,7 @@ function getLocalFallback(listText: string, location?: string) {
     economyCenters: [
       { name: "Assaí Atacadista", address: "Consulte o mapa local", badge: "Atacado", desc: "Modo de segurança ativo.", active: true }
     ],
-    assistantMessage: `💡 [Modo Offline] Usando dados locais para ${targetLocation}. Verifique o erro da API nos logs do Render.`
+    assistantMessage: `💡 [Modo Offline] Usando dados locais para ${targetLocation}. Verifique os logs se o problema persistir.`
   };
 }
 
@@ -36,14 +36,11 @@ app.post("/api/check-list", async (req, res) => {
   const targetLocation = location || "Baixada Fluminense";
   const activeApiKey = process.env.GEMINI_API_KEY;
 
-  console.log("DEBUG: Iniciando requisição. API Key encontrada?", activeApiKey ? "Sim" : "Não");
-
   try {
     if (!activeApiKey) {
-      throw new Error("A variável GEMINI_API_KEY não foi encontrada no ambiente do Render.");
+      throw new Error("A variável GEMINI_API_KEY não foi encontrada.");
     }
 
-    // Inicializando com o pacote oficial e mais estável
     const genAI = new GoogleGenerativeAI(activeApiKey);
     const model = genAI.getGenerativeModel({ 
       model: "gemini-1.5-flash",
@@ -53,7 +50,7 @@ app.post("/api/check-list", async (req, res) => {
     const prompt = `
       Você é o PechinchaBot. Analise esta lista de compras: "${listText}". 
       Considere a localização do usuário: "${targetLocation}".
-      Retorne obrigatoriamente um objeto JSON com a seguinte estrutura exata:
+      Retorne obrigatoriamente um objeto JSON com a seguinte estrutura:
       {
         "items": [
           { "name": "Nome do item", "qty": "quantidade", "priceTraditional": 10.0, "priceWholesale": 8.0 }
@@ -66,30 +63,23 @@ app.post("/api/check-list", async (req, res) => {
         "savingsTotal": 2.0,
         "assistantMessage": "Sua mensagem de resumo aqui."
       }
-      Retorne APENAS o JSON puro, sem blocos de código markdown (\`\`\`json).
     `;
     
     const resultAI = await model.generateContent(prompt);
     const responseText = resultAI.response.text();
     
-    console.log("DEBUG: Resposta bruta da IA recebida.");
-
-    // Limpeza de segurança para garantir que o JSON venha limpo
+    // CORREÇÃO: Limpeza à prova de falhas (sem Regex para não quebrar o Build)
     const cleanedResponse = responseText
-      .replace(/```json/g, "")
-      .replace(/
-```/g, "")
+      .split("```json").join("")
+      .split("```").join("")
       .trim();
 
     const jsonResult = JSON.parse(cleanedResponse);
     return res.json(jsonResult);
     
   } catch (err: any) {
-    console.error("--- ERRO DETALHADO NO BACKEND ---");
-    console.error("Mensagem de erro:", err.message);
-    console.error("Stack Trace:", err.stack);
-    console.error("---------------------------------");
-    
+    console.error("--- ERRO NA API ---");
+    console.error(err.message);
     return res.json(getLocalFallback(listText, targetLocation));
   }
 });
@@ -102,8 +92,8 @@ app.get("*", (req, res) => {
   res.sendFile(path.join(staticPath, 'index.html'));
 });
 
-// Porta dinâmica recomendada pelo Render
+// Porta dinâmica para o Render
 const PORT = process.env.PORT || 10000;
 app.listen(Number(PORT), "0.0.0.0", () => {
-  console.log(`PechinchaBot rodando com sucesso na porta ${PORT}`);
+  console.log(`Servidor rodando na porta ${PORT}`);
 });
