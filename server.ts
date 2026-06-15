@@ -22,7 +22,7 @@ function getLocalFallback(listText: string, location?: string) {
     economyCenters: [
       { name: "Assaí Atacadista", address: "Consulte o mapa local", badge: "Atacado", desc: "Simulação ativa.", active: true }
     ],
-    assistantMessage: `💡 [Modo Offline] Simulação para ${targetLocation}. Configure a GEMINI_API_KEY no Render.`
+    assistantMessage: `💡 [Modo Offline] Simulação para ${targetLocation}.`
   };
 }
 
@@ -31,7 +31,6 @@ app.post("/api/check-list", async (req, res) => {
   const { listText, location } = req.body;
   const targetLocation = location || "Baixada Fluminense";
 
-  // LINHA DE DEBUG ADICIONADA:
   const activeApiKey = process.env.GEMINI_API_KEY;
   console.log("DEBUG: Valor da API Key detectado:", activeApiKey ? "Chave encontrada!" : "Chave vazia ou undefined!");
 
@@ -43,14 +42,22 @@ app.post("/api/check-list", async (req, res) => {
       httpOptions: { headers: { "User-Agent": "render-build" } },
     });
 
-    const prompt = `Analise a lista: ${listText}. Localização: ${targetLocation}. Responda apenas em JSON.`;
+    const prompt = `Analise a lista: ${listText}. Localização: ${targetLocation}. Responda apenas em formato JSON puro, sem markdown, sem blocos de código.`;
+    
     const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
+      model: "gemini-1.5-flash",
       contents: prompt,
       config: { responseMimeType: "application/json" },
     });
 
-    return res.json(JSON.parse(response.text || "{}"));
+    // Limpeza rigorosa da resposta para garantir que seja um JSON válido
+    const rawText = response.text || "{}";
+    const cleanedResponse = rawText
+      .replace(/```json/g, "")
+      .replace(/```/g, "")
+      .trim();
+
+    return res.json(JSON.parse(cleanedResponse));
   } catch (err) {
     console.error("Erro na API:", err);
     return res.json(getLocalFallback(listText, targetLocation));
@@ -65,7 +72,8 @@ app.get("*", (req, res) => {
   res.sendFile(path.join(staticPath, 'index.html'));
 });
 
-const PORT = process.env.PORT || 3000;
+// Porta dinâmica para o Render
+const PORT = process.env.PORT || 10000;
 app.listen(Number(PORT), "0.0.0.0", () => {
   console.log(`PechinchaBot rodando na porta ${PORT}`);
 });
