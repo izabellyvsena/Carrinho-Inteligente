@@ -11,14 +11,12 @@ export default defineConfig(() => {
         '@': path.resolve(__dirname, '.'),
       },
     },
-    // Adicione este bloco abaixo para corrigir o caminho de saída
     build: {
-      outDir: 'dist',
-      emptyOutDir: true, 
+      outDir: 'dist',    // Garante que o build sempre saia na pasta 'dist' raiz
+      emptyOutDir: true, // Limpa qualquer vestígio de builds anteriores
     },
     server: {
       hmr: process.env.DISABLE_HMR !== 'true',
-      watch: process.env.DISABLE_HMR === 'true' ? null : {},
     },
   };
 });
