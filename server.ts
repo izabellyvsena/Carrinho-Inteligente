@@ -5,7 +5,6 @@ import path from "path";
 
 dotenv.config();
 
-// Definição simples e compatível com o Render
 const __dirname = path.resolve();
 
 const app = express();
@@ -32,8 +31,11 @@ app.post("/api/check-list", async (req, res) => {
   const { listText, location } = req.body;
   const targetLocation = location || "Baixada Fluminense";
 
+  // LINHA DE DEBUG ADICIONADA:
+  const activeApiKey = process.env.GEMINI_API_KEY;
+  console.log("DEBUG: Valor da API Key detectado:", activeApiKey ? "Chave encontrada!" : "Chave vazia ou undefined!");
+
   try {
-    const activeApiKey = process.env.GEMINI_API_KEY;
     if (!activeApiKey) return res.json(getLocalFallback(listText, targetLocation));
 
     const ai = new GoogleGenAI({
@@ -50,12 +52,12 @@ app.post("/api/check-list", async (req, res) => {
 
     return res.json(JSON.parse(response.text || "{}"));
   } catch (err) {
+    console.error("Erro na API:", err);
     return res.json(getLocalFallback(listText, targetLocation));
   }
 });
 
 // Servir arquivos estáticos (Frontend React)
-// Tenta buscar na pasta 'dist' ou 'build'
 const staticPath = path.join(__dirname, 'dist');
 app.use(express.static(staticPath));
 
@@ -63,7 +65,6 @@ app.get("*", (req, res) => {
   res.sendFile(path.join(staticPath, 'index.html'));
 });
 
-// Porta do Render
 const PORT = process.env.PORT || 3000;
 app.listen(Number(PORT), "0.0.0.0", () => {
   console.log(`PechinchaBot rodando na porta ${PORT}`);
