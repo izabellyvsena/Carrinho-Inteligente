@@ -1,0 +1,33 @@
+name: Carrinho Inteligente CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code Repository
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js Environment
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+
+    - name: Install Application Dependencies
+      run: npm install
+
+    - name: Verify Code Lint && TypeScript Compiler
+      run: npm run lint
+
+    - name: Compile and Bundle Application for Production
+      run: npm run build
+      env:
+        NODE_ENV: production
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}

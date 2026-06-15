@@ -1,0 +1,247 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;650;800&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Outfit", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+}
+
+/* Base keyframe animations */
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 12s linear infinite;
+}
+
+/* ==========================================================================
+   PERSISTED DARK THEME STYLING OVERRIDES (PechinchaBot Dark Elegance Mode)
+   ========================================================================== */
+
+/* Root preferences matching standard system scheme */
+html.dark, .dark {
+  color-scheme: dark;
+}
+
+/* Main Body & Layout Wrapper */
+.dark body,
+.dark .bg-\[\#FAF9F6\] {
+  background-color: #0b1120 !important; /* Elegant Obsidian background */
+  color: #e2e8f0 !important;
+}
+
+/* Main Cards, Form Sections, Feedback Modals & Bento Panels */
+.dark .bg-white,
+.dark .bg-white\/95,
+.dark .bg-white\/80,
+.dark .bg-white\/75 {
+  background-color: #121b2e !important; /* Rich Dark Ocean Blue-Slate */
+  color: #f1f5f9 !important;
+  border-color: rgba(148, 163, 184, 0.12) !important;
+}
+
+/* Modal and feedback blur overlays */
+.dark .bg-slate-900\/60 {
+  background-color: rgba(2, 6, 23, 0.7) !important;
+}
+
+/* Secondary Containers, Inputs & Dropdown Sections */
+.dark .bg-slate-50,
+.dark .bg-slate-50\/55,
+.dark .bg-slate-100\/40,
+.dark .bg-slate-105 {
+  background-color: #1b273f !important;
+  color: #f8fafc !important;
+  border-color: rgba(148, 163, 184, 0.15) !important;
+}
+
+/* Sub-panels and item tables background adjustments */
+.dark .bg-slate-100\/70 {
+  background-color: rgba(27, 39, 63, 0.5) !important;
+  color: #e2e8f0 !important;
+}
+
+/* Input boxes, textareas and fields */
+.dark input,
+.dark textarea,
+.dark select {
+  background-color: #1a2438 !important;
+  color: #f8fafc !important;
+  border-color: rgba(148, 163, 184, 0.2) !important;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: #64748b !important;
+}
+
+/* Action button overrides (Guia, and inner items) */
+.dark button.bg-white,
+.dark .bg-white button,
+.dark .bg-white .bg-white {
+  background-color: #1a253c !important;
+  color: #cbd5e1 !important;
+  border-color: rgba(148, 163, 184, 0.15) !important;
+}
+
+.dark button.bg-white:hover {
+  background-color: #243252 !important;
+  color: #f8fafc !important;
+}
+
+/* Border lines and dividers */
+.dark .border-slate-200,
+.dark .border-slate-200\/50,
+.dark .border-slate-200\/60,
+.dark .border-slate-200\/85,
+.dark .border-slate-200\/95,
+.dark .border-slate-250\/30,
+.dark .border-slate-105,
+.dark .border-slate-110,
+.dark .border-slate-150 {
+  border-color: rgba(148, 163, 184, 0.12) !important;
+}
+
+.dark .divide-slate-200 > :not([hidden]) ~ :not([hidden]) {
+  border-color: rgba(148, 163, 184, 0.12) !important;
+}
+
+/* Active headers and list tags */
+.dark .text-slate-950,
+.dark .text-slate-900,
+.dark .text-slate-850,
+.dark .text-slate-800 {
+  color: #f8fafc !important;
+}
+
+.dark .text-slate-700,
+.dark .text-slate-650 {
+  color: #cbd5e1 !important;
+}
+
+.dark .text-slate-500,
+.dark .text-slate-450 {
+  color: #94a3b8 !important;
+}
+
+.dark .text-slate-400 {
+  color: #64748b !important;
+}
+
+/* Table layout focus colors on hover and edits */
+.dark .hover\:bg-slate-50:hover,
+.dark .hover\:bg-slate-100:hover,
+.dark .hover\:bg-slate-100\/70:hover {
+  background-color: #1e2d4a !important;
+  color: #f8fafc !important;
+}
+
+.dark .focus\:bg-white:focus {
+  background-color: #1d273d !important;
+  color: #ffffff !important;
+}
+
+/* Emerald highlights adaptivity */
+.dark .bg-emerald-50\/50 {
+  background-color: rgba(16, 185, 129, 0.08) !important;
+}
+
+.dark .bg-emerald-50 {
+  background-color: rgba(16, 185, 129, 0.12) !important;
+  color: #4ade80 !important;
+}
+
+.dark .text-emerald-850,
+.dark .text-emerald-800,
+.dark .text-emerald-700 {
+  color: #34d399 !important;
+}
+
+.dark .text-emerald-950 {
+  color: #a7f3d0 !important;
+}
+
+.dark .border-emerald-100,
+.dark .border-emerald-200,
+.dark .border-emerald-150 {
+  border-color: rgba(52, 211, 153, 0.25) !important;
+}
+
+/* System notice boxes (Errors, Warnings, Success) */
+.dark .bg-rose-50,
+.dark .bg-rose-50\/90 {
+  background-color: rgba(244, 63, 94, 0.1) !important;
+  color: #fb7185 !important;
+  border-color: rgba(244, 63, 94, 0.25) !important;
+}
+
+.dark .text-rose-900,
+.dark .text-rose-800,
+.dark .text-rose-700 {
+  color: #fda4af !important;
+}
+
+.dark .bg-amber-50,
+.dark .bg-amber-50\/30 {
+  background-color: rgba(245, 158, 11, 0.08) !important;
+  color: #fca5a5 !important;
+  border-color: rgba(245, 158, 11, 0.25) !important;
+}
+
+.dark .text-amber-900,
+.dark .text-amber-800 {
+  color: #fde047 !important;
+}
+
+.dark .bg-blue-50 {
+  background-color: rgba(59, 130, 246, 0.1) !important;
+  color: #60a5fa !important;
+  border-color: rgba(59, 130, 246, 0.2) !important;
+}
+
+.dark .text-blue-900,
+.dark .text-blue-800 {
+  color: #93c5fd !important;
+}
+
+/* Fancy blur orbs color blending */
+.dark .from-emerald-150\/15 {
+  --tw-gradient-from: rgba(16, 185, 129, 0.06) var(--tw-gradient-from-position) !important;
+}
+
+.dark .from-indigo-100\/10 {
+  --tw-gradient-from: rgba(99, 102, 241, 0.05) var(--tw-gradient-from-position) !important;
+}
+
+/* Overriding SVG / Image referral controls dynamically if needed */
+.dark img {
+  opacity: 0.85;
+  transition: opacity 0.3s ease;
+}
+
+.dark img:hover {
+  opacity: 1;
+}
+
+/* Custom scrollbar adjustments for premium feel */
+.dark ::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: #090e1a;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #1b273f;
+  border-radius: 5px;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #253352;
+}

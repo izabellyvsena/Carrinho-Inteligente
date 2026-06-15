@@ -1,0 +1,6 @@
+{
+  "name": "Carrinho Inteligente",
+  "description": "Assistente financeiro em PWA que otimiza listas de compras de supermercado para uso doméstico ou comercial com inteligência artificial, comparando preços, estimando economias e propondo locais de compra físicos.",
+  "requestFramePermissions": ["geolocation"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
