@@ -2,13 +2,11 @@ import express from "express";
 import { GoogleGenAI } from "@google/genai";
 import dotenv from "dotenv";
 import path from "path";
-import { fileURLToPath } from 'url';
 
 dotenv.config();
 
-// Configuração necessária para rodar módulos ES no Node
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// Definição simples e compatível com o Render
+const __dirname = path.resolve();
 
 const app = express();
 app.use(express.json());
@@ -56,24 +54,16 @@ app.post("/api/check-list", async (req, res) => {
   }
 });
 
-// Servir arquivos estáticos da pasta 'dist'
-// Se o build gerar 'dist/dist', tentamos buscar nela também
-app.use(express.static(path.join(__dirname, 'dist')));
-app.use(express.static(path.join(__dirname, 'dist', 'dist')));
+// Servir arquivos estáticos (Frontend React)
+// Tenta buscar na pasta 'dist' ou 'build'
+const staticPath = path.join(__dirname, 'dist');
+app.use(express.static(staticPath));
 
 app.get("*", (req, res) => {
-  const indexPath = path.join(__dirname, 'dist', 'index.html');
-  const doubleIndexPath = path.join(__dirname, 'dist', 'dist', 'index.html');
-  
-  // Verifica qual caminho é válido
-  const fs = require('fs');
-  if (fs.existsSync(indexPath)) {
-    res.sendFile(indexPath);
-  } else {
-    res.sendFile(doubleIndexPath);
-  }
+  res.sendFile(path.join(staticPath, 'index.html'));
 });
 
+// Porta do Render
 const PORT = process.env.PORT || 3000;
 app.listen(Number(PORT), "0.0.0.0", () => {
   console.log(`PechinchaBot rodando na porta ${PORT}`);
