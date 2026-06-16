@@ -43,7 +43,7 @@ app.post("/api/check-list", async (req, res) => {
 
     const genAI = new GoogleGenerativeAI(activeApiKey);
     
-    // CORREÇÃO: Usando o modelo universal gemini-pro e removendo o MimeType que causa conflito
+    // Usando o modelo universal gemini-pro
     const model = genAI.getGenerativeModel({ 
       model: "gemini-pro"
     });
@@ -51,7 +51,7 @@ app.post("/api/check-list", async (req, res) => {
     const prompt = `
       Você é o PechinchaBot. Analise esta lista de compras: "${listText}". 
       Considere a localização do usuário: "${targetLocation}".
-      Retorne obrigatoriamente um objeto JSON com a seguinte estrutura:
+      Retorne obrigatoriamente APENAS um objeto JSON válido, sem formatação markdown, com a seguinte estrutura:
       {
         "items": [
           { "name": "Nome do item", "qty": "quantidade", "priceTraditional": 10.0, "priceWholesale": 8.0 }
@@ -69,12 +69,14 @@ app.post("/api/check-list", async (req, res) => {
     const resultAI = await model.generateContent(prompt);
     const responseText = resultAI.response.text();
     
-    // Limpeza à prova de falhas (sem Regex para não quebrar o Build)
-    const cleanedResponse = responseText
-      .split("```json").join("")
-      .split("
-```").join("")
-      .trim();
+    // CORREÇÃO DEFINITIVA: Extração segura de JSON sem usar crases para não quebrar o Render
+    let cleanedResponse = responseText.trim();
+    const firstBrace = cleanedResponse.indexOf('{');
+    const lastBrace = cleanedResponse.lastIndexOf('}');
+    
+    if (firstBrace !== -1 && lastBrace !== -1) {
+      cleanedResponse = cleanedResponse.slice(firstBrace, lastBrace + 1);
+    }
 
     const jsonResult = JSON.parse(cleanedResponse);
     return res.json(jsonResult);
