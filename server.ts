@@ -42,8 +42,10 @@ app.post("/api/check-list", async (req, res) => {
     }
 
     const genAI = new GoogleGenerativeAI(activeApiKey);
+    
+    // CORREÇÃO APLICADA: Usando a versão 'latest' do modelo para evitar o erro 404
     const model = genAI.getGenerativeModel({ 
-      model: "gemini-1.5-flash",
+      model: "gemini-1.5-flash-latest",
       generationConfig: { responseMimeType: "application/json" }
     });
 
@@ -68,7 +70,7 @@ app.post("/api/check-list", async (req, res) => {
     const resultAI = await model.generateContent(prompt);
     const responseText = resultAI.response.text();
     
-    // CORREÇÃO: Limpeza à prova de falhas (sem Regex para não quebrar o Build)
+    // Limpeza à prova de falhas (sem Regex para não quebrar o Build)
     const cleanedResponse = responseText
       .split("```json").join("")
       .split("```").join("")
