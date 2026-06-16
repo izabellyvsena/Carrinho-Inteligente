@@ -43,10 +43,9 @@ app.post("/api/check-list", async (req, res) => {
 
     const genAI = new GoogleGenerativeAI(activeApiKey);
     
-    // CORREÇÃO APLICADA: Usando a versão 'latest' do modelo para evitar o erro 404
+    // CORREÇÃO: Usando o modelo universal gemini-pro e removendo o MimeType que causa conflito
     const model = genAI.getGenerativeModel({ 
-      model: "gemini-1.5-flash-latest",
-      generationConfig: { responseMimeType: "application/json" }
+      model: "gemini-pro"
     });
 
     const prompt = `
@@ -73,7 +72,8 @@ app.post("/api/check-list", async (req, res) => {
     // Limpeza à prova de falhas (sem Regex para não quebrar o Build)
     const cleanedResponse = responseText
       .split("```json").join("")
-      .split("```").join("")
+      .split("
+```").join("")
       .trim();
 
     const jsonResult = JSON.parse(cleanedResponse);
