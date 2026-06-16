@@ -19,24 +19,22 @@ export default function App() {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  // CÁLCULO MATEMÁTICO REAL: (Preço * Quantidade)
+  // Função para formatar o valor no padrão Brasileiro (R$ 10,99)
+  const formatCurrency = (value: number) => {
+    return value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  };
+
+  // CÁLCULO MATEMÁTICO REAL E SEGURO: (Preço * Quantidade)
   const currentTraditionalTotal = editableItems.reduce((acc, item) => 
-    acc + ((item.priceTraditional || 0) * (item.qty || 1)), 0);
+    acc + (item.priceTraditional * item.qty), 0);
     
   const currentWholesaleTotal = editableItems.reduce((acc, item) => 
-    acc + ((item.priceWholesale || 0) * (item.qty || 1)), 0);
+    acc + (item.priceWholesale * item.qty), 0);
 
   const handleUpdateQty = (index: number, value: string) => {
     const updated = [...editableItems];
     const newQty = parseInt(value);
-    updated[index] = { ...updated[index], qty: isNaN(newQty) ? 0 : newQty };
-    setEditableItems(updated);
-  };
-
-  const handleUpdatePrice = (index: number, field: "priceTraditional" | "priceWholesale", value: string) => {
-    const updated = [...editableItems];
-    const newPrice = parseFloat(value);
-    updated[index] = { ...updated[index], [field]: isNaN(newPrice) ? 0 : newPrice };
+    updated[index] = { ...updated[index], qty: isNaN(newQty) || newQty < 1 ? 1 : newQty };
     setEditableItems(updated);
   };
 
@@ -63,7 +61,27 @@ export default function App() {
       if (!response.ok) throw new Error("Erro de comunicação com o servidor.");
       
       const data = await response.json();
-      setEditableItems(Array.isArray(data.items) ? data.items : []);
+      
+      // 🛡️ TRATAMENTO DE DADOS (Limpeza da IA)
+      const rawItems = Array.isArray(data.items) ? data.items : [];
+      const safeItems = rawItems.map((item: any) => {
+        // Converte textos com vírgula para números decimais válidos
+        const parsePrice = (val: any) => {
+          if (typeof val === 'string') {
+            return parseFloat(val.replace('R$', '').replace(/\s/g, '').replace(',', '.')) || 0;
+          }
+          return typeof val === 'number' ? val : 0;
+        };
+
+        return {
+          name: item.name || "Item",
+          qty: parseInt(item.qty) || 1,
+          priceTraditional: parsePrice(item.priceTraditional),
+          priceWholesale: parsePrice(item.priceWholesale)
+        };
+      });
+
+      setEditableItems(safeItems);
     } catch (err) {
       setError("Não foi possível conectar à IA. Verifique se o servidor está online.");
     } finally {
@@ -86,7 +104,6 @@ export default function App() {
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* COLUNA ESQUERDA: INPUT */}
         <div className="col-span-1 lg:col-span-4 flex flex-col gap-6">
           <div className="bg-[#1E293B] border border-slate-700/50 rounded-[2rem] p-7 shadow-xl">
             <div className="flex gap-2 mb-4 items-center">
@@ -111,7 +128,6 @@ export default function App() {
           </div>
         </div>
 
-        {/* COLUNA DIREITA: TABELA OTIMIZADA */}
         <div className="col-span-1 lg:col-span-8">
           <div className="bg-[#1E293B] border border-slate-700/50 rounded-[2rem] p-7 shadow-xl flex flex-col min-h-full">
             <div className="flex justify-between items-center mb-6">
@@ -141,14 +157,15 @@ export default function App() {
                            type="number" 
                            value={item.qty} 
                            onChange={(e) => handleUpdateQty(index, e.target.value)} 
+                           min="1"
                            className="w-14 bg-slate-900 border border-slate-700 text-center text-white rounded-lg p-1 outline-none focus:border-emerald-500" 
                          />
                       </td>
                       <td className="py-4 text-right pr-4 font-mono text-slate-300">
-                         R$ {(item.priceTraditional * item.qty).toFixed(2)}
+                         R$ {formatCurrency(item.priceTraditional * item.qty)}
                       </td>
                       <td className="py-4 text-right pr-2 font-mono font-bold text-emerald-400">
-                         R$ {(item.priceWholesale * item.qty).toFixed(2)}
+                         R$ {formatCurrency(item.priceWholesale * item.qty)}
                       </td>
                       <td className="py-4 text-center">
                          <button onClick={() => handleRemoveItem(index)} className="text-rose-400 p-2 hover:bg-rose-500/10 rounded-lg transition-colors">
@@ -169,8 +186,8 @@ export default function App() {
             </div>
 
             <div className="mt-8 pt-6 border-t border-slate-700/50 flex justify-between items-center text-lg md:text-xl font-black">
-               <span className="text-slate-300">Total Padrão: R$ {currentTraditionalTotal.toFixed(2)}</span>
-               <span className="text-emerald-400">Total Atacadão: R$ {currentWholesaleTotal.toFixed(2)}</span>
+               <span className="text-slate-300">Total Padrão: R$ {formatCurrency(currentTraditionalTotal)}</span>
+               <span className="text-emerald-400">Total Atacadão: R$ {formatCurrency(currentWholesaleTotal)}</span>
             </div>
           </div>
         </div>
