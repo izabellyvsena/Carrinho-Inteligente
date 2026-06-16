@@ -25,14 +25,36 @@ app.post("/api/check-list", async (req, res) => {
   const groq = new Groq({ apiKey: process.env.GROQ_API_KEY! });
 
   try {
-    const prompt = `Analise a lista: "${listText}". Retorne apenas JSON com items: [{name, qty, priceTraditional, priceWholesale}], traditionalTotal, wholesaleTotal, assistantMessage.`;
+    const prompt = `
+      Você é o PechinchaBot. Analise a lista de compras: "${listText}". 
+      
+      REGRAS ABSOLUTAS PARA QUANTIDADE (qty):
+      1. Extraia apenas o número de PACOTES ou UNIDADES físicas.
+      2. NUNCA converta quilogramas (kg) para gramas (g), nem litros (L) para mililitros (ml).
+      3. Se o usuário pedir "5kg de arroz", a quantidade (qty) é 5.
+      4. Se o usuário pedir "7 litros de leite", a quantidade (qty) é 7.
+      5. Se não houver número, assuma qty: 1.
+      
+      Retorne APENAS um objeto JSON válido e limpo, sem marcações markdown:
+      {
+        "items": [{ "name": "Arroz", "qty": 5, "priceTraditional": 10.99, "priceWholesale": 8.99 }],
+        "assistantMessage": "Análise concluída."
+      }
+    `;
+
     const completion = await groq.chat.completions.create({
       messages: [{ role: "user", content: prompt }],
       model: "llama-3.1-8b-instant",
       response_format: { type: "json_object" }
     });
-    res.json(JSON.parse(completion.choices[0].message.content || "{}"));
+    
+    // 🛡️ Blindagem restaurada: remove crases se a IA tentar formatar como markdown
+    const responseText = completion.choices[0].message.content || "{}";
+    const cleanJson = responseText.replace(/```json/g, "").replace(/```/g, "").trim();
+    
+    res.json(JSON.parse(cleanJson));
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: "Erro na IA" });
   }
 });
