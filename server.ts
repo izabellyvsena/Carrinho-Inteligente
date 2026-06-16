@@ -43,9 +43,9 @@ app.post("/api/check-list", async (req, res) => {
 
     const genAI = new GoogleGenerativeAI(activeApiKey);
     
-    // Usando o modelo universal gemini-pro
+    // CORREÇÃO: Usando a versão mais atualizada e ativa da IA do Google
     const model = genAI.getGenerativeModel({ 
-      model: "gemini-pro"
+      model: "gemini-2.0-flash"
     });
 
     const prompt = `
@@ -69,7 +69,7 @@ app.post("/api/check-list", async (req, res) => {
     const resultAI = await model.generateContent(prompt);
     const responseText = resultAI.response.text();
     
-    // CORREÇÃO DEFINITIVA: Extração segura de JSON sem usar crases para não quebrar o Render
+    // Extração segura de JSON sem usar crases para não quebrar o Render
     let cleanedResponse = responseText.trim();
     const firstBrace = cleanedResponse.indexOf('{');
     const lastBrace = cleanedResponse.lastIndexOf('}');
