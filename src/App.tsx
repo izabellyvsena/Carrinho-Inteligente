@@ -1,128 +1,60 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
-
 import { useState } from "react";
-import { Trash2 } from "lucide-react";
 
 interface Item {
   name: string;
   qty: number;
   priceTraditional: number;
+  subtotalTraditional: number;
   priceWholesale: number;
+  subtotalWholesale: number;
 }
-
-interface AnalyseResult {
-  items: Item[];
-  traditionalTotal: number;
-  wholesaleTotal: number;
-  assistantMessage: string;
-}
-
-const DEFAULT_RESULT: AnalyseResult = {
-  items: [],
-  traditionalTotal: 0,
-  wholesaleTotal: 0,
-  assistantMessage: "",
-};
 
 export default function App() {
-  const [listInput, setListInput] = useState<string>("");
-  const [editableItems, setEditableItems] = useState<Item[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
+  const [listInput, setListInput] = useState("");
+  const [items, setItems] = useState<Item[]>([]);
+  const [totals, setTotals] = useState({ trad: 0, atac: 0 });
 
-  // Cálculo matemático corrigido: Preço * Quantidade
-  const currentTraditionalTotal = editableItems.reduce((acc, item) => 
-    acc + ((item.priceTraditional || 0) * (item.qty || 1)), 0);
-    
-  const currentWholesaleTotal = editableItems.reduce((acc, item) => 
-    acc + ((item.priceWholesale || 0) * (item.qty || 1)), 0);
-
-  const handleUpdateQty = (index: number, value: string) => {
-    const updated = [...editableItems];
-    updated[index] = { ...updated[index], qty: parseInt(value) || 0 };
-    setEditableItems(updated);
-  };
-
-  const optimizeShoppingList = async () => {
-    if (!listInput.trim()) return;
-    
-    setLoading(true);
-    setError(null);
-    
-    try {
-      const response = await fetch("/api/check-list", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ listText: listInput, location: "Baixada Fluminense, RJ" }),
-      });
-
-      if (!response.ok) throw new Error("Erro no servidor");
-      
-      const data = await response.json();
-      setEditableItems(Array.isArray(data.items) ? data.items : []);
-    } catch (err) {
-      setError("Ops! Não consegui conectar com a IA. Verifique sua internet ou tente novamente.");
-    } finally {
-      setLoading(false);
-    }
+  const optimize = async () => {
+    const res = await fetch("/api/check-list", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ listText: listInput }),
+    });
+    const data = await res.json();
+    setItems(data.items);
+    setTotals({ trad: data.traditionalTotal, atac: data.wholesaleTotal });
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF9F6] p-4 md:p-10 font-sans">
-      <h1 className="text-2xl font-black mb-6">PechinchaBot</h1>
-      
-      {/* Exibição de erro para não ficar tela branca */}
-      {error && <div className="bg-red-100 text-red-700 p-4 rounded-xl mb-4 font-bold">{error}</div>}
+    <div className="p-6">
+      <h1 className="text-xl font-black mb-4">PechinchaBot</h1>
+      <textarea className="w-full border p-2 mb-2" onChange={(e) => setListInput(e.target.value)} />
+      <button onClick={optimize} className="bg-emerald-600 text-white p-2 rounded">Calcular</button>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-white p-6 rounded-3xl border shadow-sm">
-            <textarea
-              value={listInput}
-              onChange={(e) => setListInput(e.target.value)}
-              className="w-full bg-slate-50 border p-4 rounded-xl mb-4 h-32"
-              placeholder="Ex: 12 leites, 2 arrozes..."
-            />
-            <button
-              onClick={optimizeShoppingList}
-              disabled={loading}
-              className="w-full bg-emerald-600 text-white p-4 rounded-xl font-bold"
-            >
-              {loading ? "Processando..." : "Calcular Economia com IA"}
-            </button>
-        </div>
+      <table className="w-full mt-6 border-collapse">
+        <thead>
+          <tr className="text-xs uppercase text-slate-400 border-b">
+            <th className="text-left">Item</th>
+            <th>Qtd</th>
+            <th className="text-right">Total Trad.</th>
+            <th className="text-right text-emerald-600">Total Atac.</th>
+          </tr>
+        </thead>
+        <tbody>
+          {items.map((item, i) => (
+            <tr key={i} className="border-b text-sm">
+              <td className="py-2">{item.name}</td>
+              <td className="text-center">{item.qty}</td>
+              <td className="text-right">R$ {item.subtotalTraditional.toFixed(2)}</td>
+              <td className="text-right text-emerald-600 font-bold">R$ {item.subtotalWholesale.toFixed(2)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
 
-        <div className="bg-white p-6 rounded-3xl border shadow-sm">
-            <table className="w-full mb-6">
-                <thead>
-                    <tr className="text-slate-400 text-xs uppercase border-b">
-                        <th className="pb-2 text-left">Item</th>
-                        <th className="pb-2 text-center">Qtd</th>
-                        <th className="pb-2 text-right">R$</th>
-                        <th className="pb-2 text-right text-emerald-600">Atacado</th>
-                    </tr>
-                </thead>
-                <tbody>
-                  {editableItems.map((item, index) => (
-                    <tr key={index} className="border-b">
-                      <td className="py-2 text-sm font-bold">{item.name}</td>
-                      <td className="py-2 text-center">
-                         <input type="number" value={item.qty} onChange={(e) => handleUpdateQty(index, e.target.value)} className="w-10 bg-slate-100 text-center rounded" />
-                      </td>
-                      <td className="py-2 text-right text-sm">{(item.priceTraditional * item.qty).toFixed(2)}</td>
-                      <td className="py-2 text-right text-sm font-bold text-emerald-600">{(item.priceWholesale * item.qty).toFixed(2)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-            </table>
-
-            <div className="flex justify-between font-black text-md">
-               <span>Trad: R$ {currentTraditionalTotal.toFixed(2)}</span>
-               <span className="text-emerald-600">Atac: R$ {currentWholesaleTotal.toFixed(2)}</span>
-            </div>
-        </div>
+      <div className="mt-4 font-black flex justify-between">
+        <span>Total: R$ {totals.trad.toFixed(2)}</span>
+        <span className="text-emerald-600">Total Atacado: R$ {totals.atac.toFixed(2)}</span>
       </div>
     </div>
   );
