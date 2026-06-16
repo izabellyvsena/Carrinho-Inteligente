@@ -62,10 +62,10 @@ app.post("/api/check-list", async (req, res) => {
       }
     `;
     
-    // Chamada ao modelo Llama 3 da Meta
+    // Chamada ao modelo Llama 3.1 da Meta (versão atualizada e ativa)
     const chatCompletion = await groq.chat.completions.create({
       messages: [{ role: "user", content: prompt }],
-      model: "llama3-8b-8192",
+      model: "llama-3.1-8b-instant",
       response_format: { type: "json_object" } // Garante que a resposta venha estritamente como JSON estruturado
     });
 
