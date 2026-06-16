@@ -1,5 +1,5 @@
 import express from "express";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import Groq from "groq-sdk";
 import dotenv from "dotenv";
 import path from "path";
 
@@ -26,32 +26,28 @@ function getLocalFallback(listText: string, location?: string) {
     economyCenters: [
       { name: "Assaí Atacadista", address: "Consulte o mapa local", badge: "Atacado", desc: "Modo de segurança ativo.", active: true }
     ],
-    assistantMessage: `💡 [Modo Offline] Usando dados locais para ${targetLocation}. Verifique os logs se o problema persistir.`
+    assistantMessage: `💡 [Modo Offline] Usando dados locais para ${targetLocation}.`
   };
 }
 
-// Rota da API
+// Rota da API corrigida para usar a Groq
 app.post("/api/check-list", async (req, res) => {
   const { listText, location } = req.body;
   const targetLocation = location || "Baixada Fluminense";
-  const activeApiKey = process.env.GEMINI_API_KEY;
+  const activeApiKey = process.env.GROQ_API_KEY;
 
   try {
     if (!activeApiKey) {
-      throw new Error("A variável GEMINI_API_KEY não foi encontrada.");
+      throw new Error("A variável GROQ_API_KEY não foi encontrada.");
     }
 
-    const genAI = new GoogleGenerativeAI(activeApiKey);
-    
-    // CORREÇÃO: Usando a versão mais atualizada e ativa da IA do Google
-    const model = genAI.getGenerativeModel({ 
-      model: "gemini-2.0-flash"
-    });
+    // Inicializa o cliente da Groq
+    const groq = new Groq({ apiKey: activeApiKey });
 
     const prompt = `
       Você é o PechinchaBot. Analise esta lista de compras: "${listText}". 
       Considere a localização do usuário: "${targetLocation}".
-      Retorne obrigatoriamente APENAS um objeto JSON válido, sem formatação markdown, com a seguinte estrutura:
+      Retorne obrigatoriamente um objeto JSON válido com a seguinte estrutura:
       {
         "items": [
           { "name": "Nome do item", "qty": "quantidade", "priceTraditional": 10.0, "priceWholesale": 8.0 }
@@ -66,23 +62,20 @@ app.post("/api/check-list", async (req, res) => {
       }
     `;
     
-    const resultAI = await model.generateContent(prompt);
-    const responseText = resultAI.response.text();
-    
-    // Extração segura de JSON sem usar crases para não quebrar o Render
-    let cleanedResponse = responseText.trim();
-    const firstBrace = cleanedResponse.indexOf('{');
-    const lastBrace = cleanedResponse.lastIndexOf('}');
-    
-    if (firstBrace !== -1 && lastBrace !== -1) {
-      cleanedResponse = cleanedResponse.slice(firstBrace, lastBrace + 1);
-    }
+    // Chamada ao modelo Llama 3 da Meta
+    const chatCompletion = await groq.chat.completions.create({
+      messages: [{ role: "user", content: prompt }],
+      model: "llama3-8b-8192",
+      response_format: { type: "json_object" } // Garante que a resposta venha estritamente como JSON estruturado
+    });
 
-    const jsonResult = JSON.parse(cleanedResponse);
+    const responseText = chatCompletion.choices[0]?.message?.content || "{}";
+    const jsonResult = JSON.parse(responseText.trim());
+    
     return res.json(jsonResult);
     
   } catch (err: any) {
-    console.error("--- ERRO NA API ---");
+    console.error("--- ERRO NA API GROQ ---");
     console.error(err.message);
     return res.json(getLocalFallback(listText, targetLocation));
   }
@@ -99,5 +92,5 @@ app.get("*", (req, res) => {
 // Porta dinâmica para o Render
 const PORT = process.env.PORT || 10000;
 app.listen(Number(PORT), "0.0.0.0", () => {
-  console.log(`Servidor rodando na porta ${PORT}`);
+  console.log(`Servidor rodando com Groq na porta ${PORT}`);
 });
