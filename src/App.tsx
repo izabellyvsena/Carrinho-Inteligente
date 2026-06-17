@@ -22,18 +22,15 @@ import {
   Flame,
   UtensilsCrossed,
   DollarSign,
-  Calendar,
-  Save,
-  BarChart3,
-  History,
   ArchiveRestore,
-  Sparkle,
   ShieldCheck,
   HelpCircle,
   X,
   Star,
   Sun,
-  Moon
+  Moon,
+  History,
+  BarChart3
 } from "lucide-react";
 
 interface Item {
@@ -384,9 +381,9 @@ export default function App() {
         name: "Marmitas - 1ª Semana de Maio",
         date: "12/05/2026",
         items: [
-          { name: "Peito de Frango", qty: "3 kg", priceTraditional: 65.70, priceWholesale: 53.40 },
-          { name: "Batata Doce", qty: "2 kg", priceTraditional: 12.00, priceWholesale: 8.50 },
-          { name: "Azeite de Oliva", qty: "1 un", priceTraditional: 34.90, priceWholesale: 29.90 }
+          { name: "Peito de Frango", qty: "3", priceTraditional: 65.70, priceWholesale: 53.40 },
+          { name: "Batata Doce", qty: "2", priceTraditional: 12.00, priceWholesale: 8.50 },
+          { name: "Azeite de Oliva", qty: "1", priceTraditional: 34.90, priceWholesale: 29.90 }
         ],
         traditionalTotal: 112.60,
         wholesaleTotal: 91.80,
@@ -397,9 +394,9 @@ export default function App() {
         name: "Estoque Geral de Laticínios",
         date: "26/05/2026",
         items: [
-          { name: "Leite Integral 1L", qty: "12 un", priceTraditional: 71.88, priceWholesale: 58.20 },
-          { name: "Arroz Agulhinha 5kg", qty: "1 un", priceTraditional: 29.90, priceWholesale: 24.50 },
-          { name: "Feijão Preto 1kg", qty: "2 un", priceTraditional: 17.80, priceWholesale: 13.98 }
+          { name: "Leite Integral 1L", qty: "12", priceTraditional: 71.88, priceWholesale: 58.20 },
+          { name: "Arroz Agulhinha 5kg", qty: "1", priceTraditional: 29.90, priceWholesale: 24.50 },
+          { name: "Feijão Preto 1kg", qty: "2", priceTraditional: 17.80, priceWholesale: 13.98 }
         ],
         traditionalTotal: 119.58,
         wholesaleTotal: 96.68,
@@ -410,9 +407,9 @@ export default function App() {
         name: "Sacolão & Mercearia do Mês",
         date: "06/06/2026",
         items: [
-          { name: "Macarrão Espaguete", qty: "4 un", priceTraditional: 21.90, priceWholesale: 18.50 },
-          { name: "Óleo de Soja 900ml", qty: "3 un", priceTraditional: 23.70, priceWholesale: 18.60 },
-          { name: "Peito de Frango Especial", qty: "6 kg", priceTraditional: 131.40, priceWholesale: 106.80 }
+          { name: "Macarrão Espaguete", qty: "4", priceTraditional: 21.90, priceWholesale: 18.50 },
+          { name: "Óleo de Soja 900ml", qty: "3", priceTraditional: 23.70, priceWholesale: 18.60 },
+          { name: "Peito de Frango Especial", qty: "6", priceTraditional: 131.40, priceWholesale: 106.80 }
         ],
         traditionalTotal: 177.00,
         wholesaleTotal: 143.90,
@@ -477,7 +474,7 @@ export default function App() {
   const handleAddItem = () => {
     const newItem: Item = {
       name: "Novo Item de Compra",
-      qty: "1 un",
+      qty: "1",
       priceTraditional: 10.00,
       priceWholesale: 8.00
     };
@@ -1424,7 +1421,6 @@ export default function App() {
                               className="bg-transparent hover:bg-slate-100/70 focus:bg-white text-center rounded-xl px-1.5 py-1.5 text-xs font-black text-slate-700 w-16 outline-none focus:ring-4 focus:ring-slate-250/30 transition-all font-mono"
                             />
                           </td>
-                          {/* CELULAS BLINDADAS COM SUBTOTAL (Preço * Quantidade) */}
                           <td className="py-3 text-right pr-3 font-mono text-slate-800 font-bold">
                              R$ {Number((item?.priceTraditional || 0) * (parseFloat(item?.qty) || 1)).toFixed(2)}
                           </td>
