@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
 
-// PWA Service Worker dynamic registration (mantido intacto)
+// PWA Service Worker dynamic registration
 if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js')
@@ -12,7 +12,6 @@ if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
   });
 }
 
-// Renderização direta e limpa
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <App />
